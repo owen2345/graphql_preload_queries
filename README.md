@@ -1,4 +1,4 @@
-# GraphqlPreloadQueries
+# GraphqlPreloadQueries (In progress)
 This gem helps to define all possible preloads to graphql results data and avoid the common problem "N+1 Queries". 
 
 ## Usage
