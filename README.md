@@ -1,5 +1,5 @@
 # GraphqlPreloadQueries (In progress)
-This gem helps to define all possible preloads to graphql results data and avoid the common problem "N+1 Queries". 
+This gem helps to define all possible preloads for graphql data results and avoid the common problem "N+1 Queries". 
 
 ## Usage
   * For query data
@@ -10,7 +10,7 @@ This gem helps to define all possible preloads to graphql results data and avoid
       end
     ```
     When articles query is performed and:
-    * The query includes "allComments", then ```:comments``` will be automatically preloaded  
+    * The query includes "allComments", then ```:comments``` will automatically be preloaded  
     * The query does not include "allComments", then ```:comments``` is not preloaded  
     
   * For mutation data
@@ -23,7 +23,7 @@ This gem helps to define all possible preloads to graphql results data and avoid
       end
     ```
     When approve mutation is performed and:
-    * The result articles query includes "allComments", then ```:comments``` will be automatically preloaded  
+    * The result articles query includes "allComments", then ```:comments``` will automatically be preloaded  
     * The result articles query does not include "allComments", then ```:comments``` is not preloaded
     
   * For types data
@@ -36,7 +36,7 @@ This gem helps to define all possible preloads to graphql results data and avoid
       end
     ```
     When any query is retrieving an article data and:
-    * The query includes ```owner``` inside ```allComments```, then ```:author``` will be automatically preloaded inside "allComments" query  
+    * The query includes ```owner``` inside ```allComments```, then ```:author``` will automatically be preloaded inside "allComments" query  
     * The query does not include ```owner```, then ```:author``` is not preloaded
   
   Complex preload settings    
