@@ -1,0 +1,22 @@
+# This is the configuration used to check the rubocop source code.
+
+require: rubocop-rspec
+AllCops:
+  TargetRubyVersion: 2.4
+
+RSpec/FilePath:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Exclude:
+    - 'spec/**/*.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
+
+Style/Documentation:
+  Enabled: false
