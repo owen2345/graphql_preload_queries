@@ -2,6 +2,7 @@
 
 class GraphqlTest
   attr_accessor :context, :silence_error
+
   def initialize(context: {})
     @context = context
   end
@@ -70,7 +71,7 @@ class GraphqlTest
   # convert hash into query format:
   # @Sample: {a: 10, b: 'hi'} ==> a: 10, b: "hi"
   def graphql_parse_args(args)
-    parsed_args = args.to_json.gsub(/\"(\w+)\":/, '\1:')[1..-2]
+    parsed_args = args.to_json.gsub(/"(\w+)":/, '\1:')[1..-2]
     parsed_args.present? ? "(#{parsed_args})" : ''
   end
 end

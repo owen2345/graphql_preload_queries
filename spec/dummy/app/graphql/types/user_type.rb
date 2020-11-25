@@ -6,8 +6,8 @@ module Types
     field :name, String, null: true
 
     preload_field :friends, [Types::UserType], null: false,
-                  preload: { parents: [:parents, { parents: :parents }] }
+                                               preload: { parents: [:parents, { parents: :parents }] }
     preload_field :parents, [Types::UserType], null: false,
-                  preload: { friends: :friends }
+                                               preload: { friends: :friends }
   end
 end

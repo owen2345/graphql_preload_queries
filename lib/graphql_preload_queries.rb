@@ -1,6 +1,8 @@
-require "graphql_preload_queries/engine"
+# frozen_string_literal: true
+
+require 'graphql_preload_queries/engine'
 require 'graphql'
-require "graphql_preload_queries/extensions/preload"
+require 'graphql_preload_queries/extensions/preload'
 
 module GraphqlPreloadQueries
 end

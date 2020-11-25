@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 # TODO: add generic resolver
 
 module GraphqlPreloadQueries
   module Extensions
     class Preload < GraphQL::Schema::FieldExtension
       # extension to add eager loading when a field was already processed
-      def resolve(object:, arguments:, **rest)
+      def resolve(object:, arguments:, **_rest)
         klass = GraphqlPreloadQueries::Extensions::Preload
         res = yield(object, arguments)
         return res unless res
@@ -38,7 +40,7 @@ module GraphqlPreloadQueries
         # find preloads under a specific key
         def filter_preload(node, key, preload_conf, root)
           sub_node = node.selections.find do |node_i|
-            key.to_s.split("|").include?(node_i.name.to_s)
+            key.to_s.split('|').include?(node_i.name.to_s)
           end
 
           multiple_preload = preload_conf.is_a?(Array)

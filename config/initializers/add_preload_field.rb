@@ -1,4 +1,6 @@
-require "graphql_preload_queries/extensions/preload"
+# frozen_string_literal: true
+
+require 'graphql_preload_queries/extensions/preload'
 
 Rails.application.config.to_prepare do
   # Custom preload field for Object types
@@ -20,9 +22,7 @@ Rails.application.config.to_prepare do
       field key, type, settings.merge(custom_attrs)
 
       # Fix: omit non expected "extras" param auto provided by graphql
-      define_method key do |_omit_non_used_args|
-        object.send(key)
-      end unless method_defined? key
+      define_method(key) { |_omit_non_used_args| object.send(key) } unless method_defined? key
     end
   end
 end

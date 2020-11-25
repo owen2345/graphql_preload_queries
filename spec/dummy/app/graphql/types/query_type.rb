@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module Types
   class QueryType < Types::BaseObject
-
     field :users, [UserType], null: false
     def users
       resolve_preloads(User.all, { friends: :friends })

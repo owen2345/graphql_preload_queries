@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # preload resolver for queries
 Rails.application.config.to_prepare do
   Types::QueryType.class_eval do
@@ -6,16 +8,19 @@ Rails.application.config.to_prepare do
     # @param data (ActiveCollection)
     # @param preload_config (Same as Field: field[:preload])
     def resolve_preloads(data, preload_config)
-      key = caller[0][/`.*'/][1..-2]
-      klass = GraphqlPreloadQueries::Extensions::Preload
-      node = context.query.document.definitions.first.selections.find { |node_i| node_i.name == key.to_s }
+      node = find_node(caller[0][/`.*'/][1..-2])
       return data unless node
 
       # relay support (TODO: add support to skip when not using relay)
-      if ['nodes', 'edges'].include?(node.selections.first.name)
-        node = node.selections.first
-      end
-      klass.resolve_preloads(data, node, preload_config)
+      node = node.selections.first if %w[nodes edges].include?(node.selections.first.name)
+      GraphqlPreloadQueries::Extensions::Preload.resolve_preloads(data, node, preload_config)
+    end
+
+    private
+
+    def find_node(key)
+      main_node = context.query.document.definitions.first
+      main_node.selections.find { |node_i| node_i.name == key.to_s }
     end
   end
 end

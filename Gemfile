@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
@@ -14,10 +16,8 @@ gemspec
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
 
-ruby '2.6.5'
 gem 'sqlite3'
-
-
-gem 'rubocop'
-gem 'rspec-rails'
 gem 'database_cleaner'
+gem 'rspec-rails'
+gem 'rubocop'
+gem 'rubocop-rspec'

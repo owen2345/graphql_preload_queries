@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.describe 'User queries' do
-  let!(:gql) { GraphqlTest.new() }
+RSpec.describe 'UserQuery' do
+  let!(:gql) { GraphqlTest.new }
+
   describe 'when preloading query result' do
     it 'preloads configured associations for query result' do
       expect_preload({ friends: [] })
