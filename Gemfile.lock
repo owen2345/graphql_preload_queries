@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     graphql_preload_queries (0.1.0)
+      graphql
       rails
 
 GEM
@@ -66,9 +67,12 @@ GEM
     builder (3.2.4)
     concurrent-ruby (1.1.7)
     crass (1.0.6)
+    database_cleaner (1.8.5)
+    diff-lcs (1.4.4)
     erubi (1.10.0)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
+    graphql (1.11.6)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
     loofah (2.7.0)
@@ -122,6 +126,27 @@ GEM
     rake (13.0.1)
     regexp_parser (1.8.2)
     rexml (3.2.4)
+    rspec-activemodel-mocks (1.1.0)
+      activemodel (>= 3.0)
+      activesupport (>= 3.0)
+      rspec-mocks (>= 2.99, < 4.0)
+    rspec-core (3.10.0)
+      rspec-support (~> 3.10.0)
+    rspec-expectations (3.10.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-mocks (3.10.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-rails (4.0.1)
+      actionpack (>= 4.2)
+      activesupport (>= 4.2)
+      railties (>= 4.2)
+      rspec-core (~> 3.9)
+      rspec-expectations (~> 3.9)
+      rspec-mocks (~> 3.9)
+      rspec-support (~> 3.9)
+    rspec-support (3.10.0)
     rubocop (1.4.0)
       parallel (~> 1.10)
       parser (>= 2.7.1.5)
@@ -141,6 +166,7 @@ GEM
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
+    sqlite3 (1.4.2)
     thor (1.0.1)
     thread_safe (0.3.6)
     tzinfo (1.2.8)
@@ -155,8 +181,15 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  database_cleaner
   graphql_preload_queries!
+  rspec-activemodel-mocks
+  rspec-rails
   rubocop
+  sqlite3
+
+RUBY VERSION
+   ruby 2.6.5p114
 
 BUNDLED WITH
    2.1.4

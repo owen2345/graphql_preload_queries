@@ -7,6 +7,8 @@ module GraphqlPreloadQueries
       def resolve(object:, arguments:, **rest)
         klass = GraphqlPreloadQueries::Extensions::Preload
         res = yield(object, arguments)
+        return res unless res
+
         klass.resolve_preloads(res, arguments[:ast_node], (options || {}))
       end
 
@@ -16,8 +18,11 @@ module GraphqlPreloadQueries
         # @return @data with preloads configured
         # Sample: resolve_preloads(Category.all, { allPosts: :posts })
         def resolve_preloads(data, query_node, preload_config)
-          preloads = filter_preloads(query_node, preload_config)
-          data.eager_load(preloads)
+          apply_preloads(data, filter_preloads(query_node, preload_config))
+        end
+
+        def apply_preloads(collection, preloads)
+          collection.eager_load(preloads)
         end
 
         # find all configured preloads inside a node
@@ -32,7 +37,6 @@ module GraphqlPreloadQueries
 
         # find preloads under a specific key
         def filter_preload(node, key, preload_conf, root)
-          # selections = node.respond_to?(:selections) ? node.selections : node.children
           sub_node = node.selections.find do |node_i|
             key.to_s.split("|").include?(node_i.name)
           end
@@ -50,8 +54,9 @@ module GraphqlPreloadQueries
         # Sample: parent_preload: "categories.users"
         #         ==> { categories: { users: [res here] } }
         def add_preload_key(root, key, value)
-          root.dig(*key.to_s.split('.'))
-          *path, last = key.to_s.split('.')
+          key_path = key.to_s.split('.').map(&:to_sym)
+          root.dig(*key_path)
+          *path, last = key_path
           path.inject(root, :fetch)[last] = value
         end
 
