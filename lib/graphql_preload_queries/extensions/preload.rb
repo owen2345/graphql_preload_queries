@@ -38,14 +38,14 @@ module GraphqlPreloadQueries
         # find preloads under a specific key
         def filter_preload(node, key, preload_conf, root)
           sub_node = node.selections.find do |node_i|
-            key.to_s.split("|").include?(node_i.name)
+            key.to_s.split("|").include?(node_i.name.to_s)
           end
 
           multiple_preload = preload_conf.is_a?(Array)
           return unless sub_node
           return add_preload_key(root, preload_conf, []) unless multiple_preload
 
-          child_root = {}
+          child_root = nested_hash
           filter_preloads(sub_node, preload_conf[1], child_root)
           add_preload_key(root, preload_conf[0], child_root.presence || [])
         end

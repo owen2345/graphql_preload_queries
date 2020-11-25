@@ -2,7 +2,7 @@
 This gem helps to define all possible preloads for graphql data results and avoid the common problem "N+1 Queries". 
 
 ## Usage
-  * For query data
+  * Preloads in query results
     ```ruby
       # queries/articles.rb
       def articles
@@ -13,7 +13,7 @@ This gem helps to define all possible preloads for graphql data results and avoi
     * The query includes "allComments", then ```:comments``` will automatically be preloaded  
     * The query does not include "allComments", then ```:comments``` is not preloaded  
     
-  * For mutation data
+  * Preloads in mutation results
     ```ruby
       # mutations/articles/approve.rb
       def resolve
@@ -26,7 +26,7 @@ This gem helps to define all possible preloads for graphql data results and avoi
     * The result articles query includes "allComments", then ```:comments``` will automatically be preloaded  
     * The result articles query does not include "allComments", then ```:comments``` is not preloaded
     
-  * For types data
+  * Preloads in ObjectTypes
     ```ruby
       # types/article_type.rb
       module Types
@@ -38,27 +38,38 @@ This gem helps to define all possible preloads for graphql data results and avoi
     When any query is retrieving an article data and:
     * The query includes ```owner``` inside ```allComments```, then ```:author``` will automatically be preloaded inside "allComments" query  
     * The query does not include ```owner```, then ```:author``` is not preloaded
-  
+    This field is exactly the same as the graphql field, except that this field expects for "preload" setting which contains all configurations for preloading
+    
   Complex preload settings    
   ```ruby
     # category query
     {
       'posts' =>
-        [:posts,
+        [:posts, # :posts preload key will be used when: { posts { id ... } }
           {
-            'authors|allAuthors' => [:author, {
-              address: :address
+            'authors|allAuthors' => [:author, { # :author key will be used when: { posts { allAuthors { id ... } } } 
+              address: :address # :address key will be used when: { posts { allAuthors { address { id ... } } } }
             }],
-            history: :versions
+            history: :versions # :versions key will be used when: { posts { history { ... } } }
           }
         ],
-      'disabled_posts' => ['category_disabled_posts.post', {
-        authors: :authors
+      'disabledPosts' => ['category_disabled_posts.post', { # :category_disabled_posts.post key will be used when: { disabledPosts { ... } }
+        authors: :authors # :authors key will be used when: { disabledPosts { authors { ... } } }
       }]
     }
   ```
   * ```authors|allAuthors``` means that the preload will be added if "authors" or "allAuthors" is present in the query
   * ```category_disabled_posts.post``` means an inner preload, sample: ```posts.preload({ category_disabled_posts: :post })```
+    
+### Important: 
+  Is needed to omit "extra" params auto provided by Graphql when using custom resolver (only in case not using params), sample:
+  ```ruby
+    # types/post_type.rb
+    preload_field :allComments, [Types::CommentType], preload: { owner: :author }, null: false
+    def allComments(_omit_gql_params) # custom method resolver that omits non used params
+      object.allComments
+    end
+  ```
     
 
 ## Installation
