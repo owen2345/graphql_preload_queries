@@ -16,8 +16,3 @@ gemspec
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
 
-gem 'sqlite3'
-gem 'database_cleaner'
-gem 'rspec-rails'
-gem 'rubocop'
-gem 'rubocop-rspec'

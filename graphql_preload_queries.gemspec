@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'graphql'
   spec.add_dependency 'rails'
   spec.add_development_dependency 'sqlite3'
-  spec.add_development_dependency 'database_cleaner'
+  spec.add_development_dependency 'database_cleaner-active_record'
   spec.add_development_dependency 'rspec-rails'
   spec.add_development_dependency 'rubocop'
   spec.add_development_dependency 'rubocop-rspec'
