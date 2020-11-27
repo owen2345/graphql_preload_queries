@@ -16,9 +16,11 @@ This gem helps to define all possible preloads for graphql data results and avoi
   * Preloads in mutation results
     ```ruby
       # mutations/articles/approve.rb
+      #...
+      field :articles, [Types::ArticleType], null: true  
       def resolve
         affected_articles = Article.where(id: [1,2,3])
-        res = resolve_preloads(affected_articles, { allComments: :comments })
+        res = resolve_preloads(:articles, affected_articles, { allComments: :comments })
         { articles => res }
       end
     ```
