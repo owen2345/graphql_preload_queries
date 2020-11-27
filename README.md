@@ -1,5 +1,5 @@
-# GraphqlPreloadQueries (In progress)
-This gem helps to define all possible preloads for graphql data results and avoid the common problem "N+1 Queries". 
+# GraphqlPreloadQueries
+This gem helps you to define all nested preloads to be added when required for graphql data results and avoid the common problem "N+1 Queries". 
 
 ## Usage
   * Preloads in query results
@@ -10,8 +10,11 @@ This gem helps to define all possible preloads for graphql data results and avoi
       end
     ```
     When articles query is performed and:
-    * The query includes "allComments", then ```:comments``` will automatically be preloaded  
-    * The query does not include "allComments", then ```:comments``` is not preloaded  
+    * The query includes "allComments", then ```:comments``` will automatically be preloaded    
+      - Single query: ```articles { id comments { id msg } } ```      
+      - Relay query: ```articles { nodes { id comments { id msg } } } ```  
+    * The query does not include "allComments", then ```:comments``` is not preloaded    
+      ```articles { id title } ```  
     
   * Preloads in mutation results
     ```ruby
@@ -21,12 +24,14 @@ This gem helps to define all possible preloads for graphql data results and avoi
       def resolve
         affected_articles = Article.where(id: [1,2,3])
         res = resolve_preloads(:articles, affected_articles, { allComments: :comments })
-        { articles => res }
+        { articles: res }
       end
     ```
     When approve mutation is performed and:
-    * The result articles query includes "allComments", then ```:comments``` will automatically be preloaded  
-    * The result articles query does not include "allComments", then ```:comments``` is not preloaded
+    * The result articles query includes "allComments", then ```:comments``` will automatically be preloaded    
+      ```mutation articlesApprove (...) { articles { id allComments { id msg } } }```
+    * The result articles query does not include "allComments", then ```:comments``` is not preloaded   
+      ```mutation articlesApprove (...) { articles { id title } }```
     
   * Preloads in ObjectTypes
     ```ruby
@@ -38,9 +43,11 @@ This gem helps to define all possible preloads for graphql data results and avoi
       end
     ```
     When any query is retrieving an article data and:
-    * The query includes ```owner``` inside ```allComments```, then ```:author``` will automatically be preloaded inside "allComments" query  
-    * The query does not include ```owner```, then ```:author``` is not preloaded
-    This field is exactly the same as the graphql field, except that this field expects for "preload" setting which contains all configurations for preloading
+    * The query includes ```owner``` inside ```allComments```, then ```:author``` will automatically be preloaded inside "allComments" query    
+      ```article { id allComments { id owner { id name } } } ```
+    * The query does not include ```owner```, then ```:author``` is not preloaded   
+      ```article { id allComments { id msg } } ```
+    Note: This field is exactly the same as the graphql field, except that this field expects for "preload" setting which contains all configurations for preloading
     
   Complex preload settings    
   ```ruby
@@ -50,7 +57,7 @@ This gem helps to define all possible preloads for graphql data results and avoi
         [:posts, # :posts preload key will be used when: { posts { id ... } }
           {
             'authors|allAuthors' => [:author, { # :author key will be used when: { posts { allAuthors { id ... } } } 
-              address: :address # :address key will be used when: { posts { allAuthors { address { id ... } } } }
+              address: :address # :address preload key will be used when: { posts { allAuthors { address { id ... } } } }
             }],
             history: :versions # :versions key will be used when: { posts { history { ... } } }
           }
