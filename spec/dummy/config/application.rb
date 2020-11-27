@@ -14,8 +14,8 @@ module Dummy
     # config.assets.enabled = false
     # config.assets.precompile = []
     config.i18n.default_locale = :de
-    config.i18n.available_locales = [:de, :en, :fr]
-    config.i18n.fallbacks = [:en, :de]
+    config.i18n.available_locales = %i[de]
+    config.i18n.fallbacks = %i[en de]
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
