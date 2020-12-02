@@ -15,32 +15,40 @@ This gem helps you to define all nested preloads to be added when required for g
     end
     ```
     Examples:
-    * ```add_preload :friends```
+    * ```add_preload(:friends)```   
       ```:friends``` association will be preloaded if query includes ```friends```, like: ```user(id: 10) { friends { ... } }```
     
-    * ```add_preload :allFriends, :friends```
+    * ```add_preload(:allFriends, :friends)```   
       ```:friends``` association will be preloaded if query includes ```allFriends```, like: ```user(id: 10) { allFriends { ... } }```  
     
-    * ```add_preload :allFriends, { preload: :friends, parents: :parents }```
+    * ```add_preload(:allFriends, { preload: :friends, parents: :parents })```   
       ```:preload``` key can be used to indicate the association name when defining nested preloads, like: ```user(id: 10) { allFriends { id parents { ... } } }```  
     
-    * ```add_preload :friends, { allParents: :parents }```
+    * ```add_preload(:friends, { allParents: :parents })```    
       (Nested 1 lvl preloading) ```friends: :parents``` association will be preloaded if query includes ```allParents```, like: ```user(id: 10) { friends { allParents { ... } } }```  
     
-    * ```add_preload :friends, { allParents: { preload: :parents, friends: :friends } }```
+    * ```add_preload(:friends, { allParents: { preload: :parents, friends: :friends } })```    
       (Nested 2 levels preloading) ```friends: { parents: :friends }``` association will be preloaded if query includes ```friends``` inside ```parents```, like: ```user(id: 10) { friends { allParents { { friends { ... } } } } }```  
     
-    * ```add_preload 'friends|allFriends', :friends```
+    * ```add_preload('friends|allFriends', :friends)```    
       (Multiple gql queries) ```:friends``` association will be preloaded if query includes ```friends``` or ```allFriends```, like: ```user(id: 10) { friends { ... } }``` OR ```user(id: 10) { allFriends { ... } }```   
       
-    * ```add_preload 'ignoredFriends', 'ignored_friends.user'```
+    * ```add_preload('ignoredFriends', 'ignored_friends.user')```    
       (Deep preloading) ```{ ignored_friends: :user }``` association will be preloaded if query includes ```inogredFriends```, like: ```user(id: 10) { ignoredFriends { ... } }```   
     
   * Preloads in query results
     ```ruby
       # queries/users.rb
       def user(id:)
+        # includes all preloads defined in user type
+        #   Sample: user(id: 10){ friends { id } }
+        #     :friends will be preloaded inside "user" sql query    
         user = include_gql_preloads(:user, User.where(id: id))
+        
+        # does not include user type preloads (only sub query preloads will be applied)
+        #   Sample: user(id: 10){ friends { id parents { ... } } }
+        #     Only :parents will be preloaded inside "friends" sql query
+        user = User.find(id)
       end
     ```
     - include_gql_preloads: Will preload all preloads configured in UserType based on the gql query.
@@ -53,7 +61,7 @@ This gem helps you to define all nested preloads to be added when required for g
       def resolve(ids:)
         affected_users = User.where(id: ids)
         affected_users = include_gql_preloads(:users, affected_users)
-        puts affected_users.first&.friends
+        puts affected_users.first&.friends # will print preloaded friends data
         { users: affected_users }
       end
     ```
