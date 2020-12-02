@@ -2,85 +2,63 @@
 This gem helps you to define all nested preloads to be added when required for graphql data results and avoid the common problem "N+1 Queries". 
 
 ## Usage
+  * Object Type
+    ```ruby
+    class UserType < Types::BaseObject
+      add_preload 'parents|allParents', { preload: :parents, friends: :friends, parents: :parents }
+      add_preload :friends, { parents: { preload: :parents, parents: :parents, friends: :friends } }
+    
+      field :id, Int, null: true
+      field :name, String, null: true
+      field :friends, [Types::UserType], null: false
+      field :parents, [Types::UserType], null: false
+    end
+    ```
+    Examples:
+    * ```add_preload :friends```
+      ```:friends``` association will be preloaded if query includes ```friends```, like: ```user(id: 10) { friends { ... } }```
+    
+    * ```add_preload :allFriends, :friends```
+      ```:friends``` association will be preloaded if query includes ```allFriends```, like: ```user(id: 10) { allFriends { ... } }```  
+    
+    * ```add_preload :allFriends, { preload: :friends, parents: :parents }```
+      ```:preload``` key can be used to indicate the association name when defining nested preloads, like: ```user(id: 10) { allFriends { id parents { ... } } }```  
+    
+    * ```add_preload :friends, { allParents: :parents }```
+      (Nested 1 lvl preloading) ```friends: :parents``` association will be preloaded if query includes ```allParents```, like: ```user(id: 10) { friends { allParents { ... } } }```  
+    
+    * ```add_preload :friends, { allParents: { preload: :parents, friends: :friends } }```
+      (Nested 2 levels preloading) ```friends: { parents: :friends }``` association will be preloaded if query includes ```friends``` inside ```parents```, like: ```user(id: 10) { friends { allParents { { friends { ... } } } } }```  
+    
+    * ```add_preload 'friends|allFriends', :friends```
+      (Multiple gql queries) ```:friends``` association will be preloaded if query includes ```friends``` or ```allFriends```, like: ```user(id: 10) { friends { ... } }``` OR ```user(id: 10) { allFriends { ... } }```   
+      
+    * ```add_preload 'ignoredFriends', 'ignored_friends.user'```
+      (Deep preloading) ```{ ignored_friends: :user }``` association will be preloaded if query includes ```inogredFriends```, like: ```user(id: 10) { ignoredFriends { ... } }```   
+    
   * Preloads in query results
     ```ruby
-      # queries/articles.rb
-      def articles
-        resolve_preloads(Article.all, { allComments: :comments })
+      # queries/users.rb
+      def user(id:)
+        user = include_gql_preloads(:user, User.where(id: id))
       end
     ```
-    When articles query is performed and:
-    * The query includes "allComments", then ```:comments``` will automatically be preloaded    
-      - Single query: ```articles { id comments { id msg } } ```      
-      - Relay query: ```articles { nodes { id comments { id msg } } } ```  
-    * The query does not include "allComments", then ```:comments``` is not preloaded    
-      ```articles { id title } ```  
+    - include_gql_preloads: Will preload all preloads configured in UserType based on the gql query.
     
   * Preloads in mutation results
     ```ruby
-      # mutations/articles/approve.rb
+      # mutations/users/disable.rb
       #...
-      field :articles, [Types::ArticleType], null: true  
-      def resolve
-        affected_articles = Article.where(id: [1,2,3])
-        res = resolve_preloads(:articles, affected_articles, { allComments: :comments })
-        { articles: res }
+      field :users, [Types::UserType], null: true  
+      def resolve(ids:)
+        affected_users = User.where(id: ids)
+        affected_users = include_gql_preloads(:users, affected_users)
+        puts affected_users.first&.friends
+        { users: affected_users }
       end
     ```
-    When approve mutation is performed and:
-    * The result articles query includes "allComments", then ```:comments``` will automatically be preloaded    
-      ```mutation articlesApprove (...) { articles { id allComments { id msg } } }```
-    * The result articles query does not include "allComments", then ```:comments``` is not preloaded   
-      ```mutation articlesApprove (...) { articles { id title } }```
+    - include_gql_preloads: Will preload all preloads configured in UserType based on the gql query.
     
-  * Preloads in ObjectTypes
-    ```ruby
-      # types/article_type.rb
-      module Types
-        class ArticleType < Types::BaseObject
-          preload_field :allComments, [Types::CommentType], preload: { owner: :author }, null: false
-        end
-      end
-    ```
-    When any query is retrieving an article data and:
-    * The query includes ```owner``` inside ```allComments```, then ```:author``` will automatically be preloaded inside "allComments" query    
-      ```article { id allComments { id owner { id name } } } ```
-    * The query does not include ```owner```, then ```:author``` is not preloaded   
-      ```article { id allComments { id msg } } ```
-    Note: This field is exactly the same as the graphql field, except that this field expects for "preload" setting which contains all configurations for preloading
-    
-  Complex preload settings    
-  ```ruby
-    # category query
-    {
-      'posts' =>
-        [:posts, # :posts preload key will be used when: { posts { id ... } }
-          {
-            'authors|allAuthors' => [:author, { # :author key will be used when: { posts { allAuthors { id ... } } } 
-              address: :address # :address preload key will be used when: { posts { allAuthors { address { id ... } } } }
-            }],
-            history: :versions # :versions key will be used when: { posts { history { ... } } }
-          }
-        ],
-      'disabledPosts' => ['category_disabled_posts.post', { # :category_disabled_posts.post key will be used when: { disabledPosts { ... } }
-        authors: :authors # :authors key will be used when: { disabledPosts { authors { ... } } }
-      }]
-    }
-  ```
-  * ```authors|allAuthors``` means that the preload will be added if "authors" or "allAuthors" is present in the query
-  * ```category_disabled_posts.post``` means an inner preload, sample: ```posts.preload({ category_disabled_posts: :post })```
-    
-### Important: 
-  Is needed to omit "extra" params auto provided by Graphql when using custom resolver (only in case not using params), sample:
-  ```ruby
-    # types/post_type.rb
-    preload_field :allComments, [Types::CommentType], preload: { owner: :author }, null: false
-    def allComments(_omit_gql_params) # custom method resolver that omits non used params
-      object.allComments
-    end
-  ```
-    
-
 ## Installation
 Add this line to your application's Gemfile:
 

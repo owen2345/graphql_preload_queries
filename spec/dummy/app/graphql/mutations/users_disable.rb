@@ -10,7 +10,7 @@ module Mutations
 
     def resolve(ids:)
       users = User.all.where(ids)
-      res = resolve_preloads(:users, users, { friends: :friends })
+      res = include_gql_preloads(:users, users)
       { users: res }
     end
   end

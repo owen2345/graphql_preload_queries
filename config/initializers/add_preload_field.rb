@@ -3,26 +3,34 @@
 require 'graphql_preload_queries/extensions/preload'
 
 Rails.application.config.to_prepare do
-  # Custom preload field for Object types
   Types::BaseObject.class_eval do
-    # @param key field[:key]
-    # @param type field[:type]
-    # @param settings field[:settings] ++ { preload: {} }
-    #   preload: (Hash) { allPosts: [:posts, { author: :author }] }
-    #   ==> <cat1>.preload(posts: :author) // if author and posts are in query
-    #   ==> <cat1>.preload(:posts) // if only author is in the query
-    #   ==> <cat1>.preload() // if both of them are not in the query
-    # TODO: ability to merge extensions + extras
-    def self.preload_field(key, type, settings = {})
-      klass = GraphqlPreloadQueries::Extensions::Preload
-      custom_attrs = {
-        extras: [:ast_node],
-        extensions: [klass => settings.delete(:preload)]
-      }
-      field key, type, settings.merge(custom_attrs)
+    class << self
+      def preloads
+        @preloads ||= {}
+      end
 
-      # Fix: omit non expected "extras" param auto provided by graphql
-      define_method(key) { |_omit_non_used_args| object.send(key) } unless method_defined? key
+      # @param key (Symbol|String)
+      # @param preload (Symbol|String or Symbol|String|Hash)
+      # @Sample:
+      ## key argument supports for multiple query names
+      #    add_preload('users|allUsers', :users)
+      ## preload argument indicates the association name to be preloaded
+      #    add_preload(:allUsers, :users)
+      ## preload argument supports for nested associations
+      #    add_preload(:inactiveUsers, 'inactivated_users.user')
+      ## "preload" key should be specified to indicate the association name
+      #    add_preload(:allUsers, { preload: :users, 'allComments|comments' => :comments } })
+      ## preload key can be omitted to use the same name as the key
+      #    add_preload(:users, { 'allComments|comments' => :comments } })
+      def add_preload(key, preload)
+        preload ||= key
+        raise('Invalid preload query key') if [String, Symbol].exclude?(key.class)
+        raise('Invalid preload preload key') if [String, Symbol, Hash].exclude?(preload.class)
+
+        preload[:preload] ||= key if preload.is_a?(Hash)
+        key = GraphQL::Schema::Member::BuildType.camelize(key.to_s)
+        preloads[key] = preload
+      end
     end
   end
 end

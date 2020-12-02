@@ -4,14 +4,15 @@ module Types
   class QueryType < Types::BaseObject
     field :users, [UserType], null: false
     def users
-      resolve_preloads(User.all, { friends: :friends })
+      data = User.all
+      include_gql_preloads(:users, data) # preloading associations
     end
 
     field :user, UserType, null: true do
       argument :id, ID, required: true
     end
     def user(id:)
-      User.find(id)
+      User.find(id) # without preloading associations
     end
   end
 end

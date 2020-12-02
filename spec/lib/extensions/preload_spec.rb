@@ -17,6 +17,13 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
       expect(res).to eql({})
     end
 
+    it 'uses query name as the preload association key if :preload not defined' do
+      node = query_node({ users: %i[id name friends { id }] })
+      preload_config = { users: { friends: :friends } } # does not include :preload
+      res = filter_preloads(node, preload_config)
+      expect(res).to eql({ users: { friends: [] } })
+    end
+
     it 'supports for multiple query names: preload "users" when "users" or
         "allUsers" are present in the query' do
       node = query_node({ allUsers: %i[id name] })
@@ -27,8 +34,8 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
 
     it 'supports for deep preload keys: preload "assigned_friends.user" when
         "friends" is present inside "users" query' do
-      node = query_node({ users: { id: true, friends: %i[id name] } })
-      preload_config = { users: [:users, { friends: 'assigned_friends.user' }] }
+      node = query_node({ allUsers: { id: true, friends: %i[id name] } })
+      preload_config = { allUsers: { preload: :users, friends: 'assigned_friends.user' } }
       res = filter_preloads(node, preload_config)
       expect(res).to eql({ users: { assigned_friends: { user: [] } } })
     end
@@ -37,12 +44,11 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
       node = query_node(
         {
           users: { id: true,
-                   closeFriends: { id: true, name: true,
-                                   allComments: %i[id msg] } }
+                   closeFriends: { id: true, name: true, allComments: %i[id msg] } }
         }
       )
-      friends_preload = { closeFriends: [:close_friends, { allComments: :comments }] }
-      preload_config = { 'users' => [:users, friends_preload] }
+      friends_preload = { closeFriends: { allComments: :comments } }
+      preload_config = { users: friends_preload }
       res = filter_preloads(node, preload_config)
       expect(res).to eql({ users: { close_friends: { comments: [] } } })
     end
@@ -51,7 +57,7 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
   private
 
   def filter_preloads(node, preload_conf)
-    described_class.filter_preloads(node, preload_conf)
+    described_class.send(:filter_preloads, node, preload_conf)
   end
 
   # @param data (Hash|Array)
