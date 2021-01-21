@@ -1,3 +1,6 @@
+## 0.2.2 (21-01-2021)
+- Fix: Fix deep recursive stack error
+
 ## 0.2.1 (21-01-2021)
 - fix: add default preload to key
 - fix: fix invalid key when deep preloading
