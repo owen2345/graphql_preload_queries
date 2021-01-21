@@ -7,7 +7,7 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
       node = query_node({ allUsers: %i[id name] })
       preload_config = { 'allUsers' => :users }
       res = filter_preloads(node, preload_config)
-      expect(res).to eql({ users: [] })
+      expect(res).to eql({ users: {} })
     end
 
     it 'does not apply preload if query does not include exp. preload' do
@@ -21,7 +21,7 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
       node = query_node({ users: %i[id name friends { id }] })
       preload_config = { users: { friends: :friends } } # does not include :preload
       res = filter_preloads(node, preload_config)
-      expect(res).to eql({ users: { friends: [] } })
+      expect(res).to eql({ users: { friends: {} } })
     end
 
     it 'supports for multiple query names: preload "users" when "users" or
@@ -29,7 +29,7 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
       node = query_node({ allUsers: %i[id name] })
       preload_config = { 'users|allUsers' => :users }
       res = filter_preloads(node, preload_config)
-      expect(res).to eql({ users: [] })
+      expect(res).to eql({ users: {} })
     end
 
     it 'supports for deep preload keys: preload "assigned_friends.user" when
@@ -37,7 +37,7 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
       node = query_node({ allUsers: { id: true, friends: %i[id name] } })
       preload_config = { allUsers: { preload: :users, friends: 'assigned_friends.user' } }
       res = filter_preloads(node, preload_config)
-      expect(res).to eql({ users: { assigned_friends: { user: [] } } })
+      expect(res).to eql({ users: { assigned_friends: { user: {} } } })
     end
 
     it 'applies exp. deep preloads if query includes exp. preloads' do
@@ -50,7 +50,7 @@ RSpec.describe GraphqlPreloadQueries::Extensions::Preload do
       friends_preload = { closeFriends: { allComments: :comments } }
       preload_config = { users: friends_preload }
       res = filter_preloads(node, preload_config)
-      expect(res).to eql({ users: { close_friends: { comments: [] } } })
+      expect(res).to eql({ users: { close_friends: { comments: {} } } })
     end
   end
 

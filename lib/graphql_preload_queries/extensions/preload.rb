@@ -36,12 +36,12 @@ module GraphqlPreloadQueries
           sub_node = sub_node(node, key)
           multiple_preload = preload_conf.is_a?(Hash)
           return unless sub_node
-          return add_preload_key(root, preload_conf, []) unless multiple_preload
+          return add_preload_key(root, preload_conf, {}) unless multiple_preload
 
           child_root = nested_hash
           association_name = preload_conf[:preload] || key.to_s.underscore
           filter_preloads(sub_node, preload_conf, child_root)
-          add_preload_key(root, association_name, child_root.presence || [])
+          add_preload_key(root, association_name, child_root.presence || {})
         end
 
         def sub_node(node, key)

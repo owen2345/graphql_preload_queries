@@ -7,7 +7,7 @@ RSpec.describe 'UserQuery' do
 
   describe 'when preloading query result' do
     it 'preloads configured associations for query result' do
-      expect_preload({ friends: [] })
+      expect_preload({ friends: {} })
       gql.query('users', 'id name friends { id }')
     end
   end
@@ -19,20 +19,20 @@ RSpec.describe 'UserQuery' do
     let!(:user) { User.create(name: 'name', friends: friends) }
 
     it 'preloads 1 level nested value' do
-      expect_preload({ friends: { parents: [] } })
+      expect_preload({ friends: { parents: {} } })
       return_data = 'id name friends { id parents { id } }'
       gql.query('users', return_data)
     end
 
     it 'preloads 2 level nested values' do
-      expect_preload({ friends: { parents: { parents: [] } } })
+      expect_preload({ friends: { parents: { parents: {} } } })
       return_data = 'id name friends { id parents { id parents { id } } }'
       gql.query('users', return_data)
     end
 
     # "user" query already loads UserModel without preloads
     it 'preloads children associations when object already loaded' do
-      expect_preload({ parents: { parents: [] } })
+      expect_preload({ parents: { parents: {} } })
       return_data = 'id name friends { id parents { id parents { id } } }'
       gql.query('user', return_data, params: { id: user.id })
     end

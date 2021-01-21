@@ -22,7 +22,7 @@ Rails.application.config.to_prepare do
       #    add_preload(:allUsers, { preload: :users, 'allComments|comments' => :comments } })
       ## preload key can be omitted to use the same name as the key
       #    add_preload(:users, { 'allComments|comments' => :comments } })
-      def add_preload(key, preload)
+      def add_preload(key, preload = key)
         preload ||= key
         raise('Invalid preload query key') if [String, Symbol].exclude?(key.class)
         raise('Invalid preload preload key') if [String, Symbol, Hash].exclude?(preload.class)
