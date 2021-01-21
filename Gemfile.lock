@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    graphql_preload_queries (0.1.0)
+    graphql_preload_queries (0.2.0)
       graphql
       rails
 
@@ -189,6 +189,9 @@ DEPENDENCIES
   rubocop
   rubocop-rspec
   sqlite3
+
+RUBY VERSION
+   ruby 2.6.5p114
 
 BUNDLED WITH
    2.1.4
