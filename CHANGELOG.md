@@ -1,3 +1,7 @@
+## 0.2.1 (21-01-2021)
+- fix: add default preload to key
+- fix: fix invalid key when deep preloading
+
 ## 0.2.0 (02-12-2020)
 - Refactor: Preload associations when iterating activeRecord::Relation
 
