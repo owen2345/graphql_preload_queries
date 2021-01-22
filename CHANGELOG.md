@@ -1,3 +1,8 @@
+## 0.3 (22-01-2021)
+- feat: add debug mode
+    ```GraphqlPreloadQueries::DEBUG = true```
+- fix: detect the correct Query Result Type
+
 ## 0.2.2 (21-01-2021)
 - Fix: Fix deep recursive stack error
 
