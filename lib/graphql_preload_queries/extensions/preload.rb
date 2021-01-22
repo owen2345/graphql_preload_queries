@@ -12,7 +12,10 @@ module GraphqlPreloadQueries
         # @param @type_klass (GqlTypeKlass)
         # @return @data with necessary preloads
         def preload_associations(value, node, type_klass)
-          apply_preloads(value, filter_preloads(node, type_klass.preloads || {}))
+          preloads = filter_preloads(node, type_klass.preloads || {})
+          log_info = { type_klass: type_klass, preloads: preloads, configured: type_klass.preloads }
+          GraphqlPreloadQueries.log("Preloading: #{log_info}")
+          apply_preloads(value, preloads)
         end
 
         private
