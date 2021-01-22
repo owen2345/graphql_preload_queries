@@ -84,6 +84,12 @@ Or install it yourself as:
 $ gem install graphql_preload_queries
 ```
 
+For debugging mode:
+```
+  # config/initializers/gql_preload.rb
+  GraphqlPreloadQueries::DEBUG = true
+```
+
 ## Contributing
 Bug reports and pull requests are welcome on GitHub at https://github.com/owen2345/graphql_preload_queries. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
