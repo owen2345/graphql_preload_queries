@@ -7,7 +7,7 @@ module GraphqlPreloadQueries::PatchContinueValue # rubocop:disable Style/ClassAn
     value = args[1]
     ast_node = args[5]
     field = args[3]
-    type_klass = field.owner
+    type_klass = Array(field.instance_variable_get(:@return_type_expr))[0]
     is_active_record = value.is_a?(ActiveRecord::Relation)
     return super if !is_active_record || value.loaded? || !type_klass.respond_to?(:preloads)
 
