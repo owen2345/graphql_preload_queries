@@ -1,3 +1,6 @@
+## 0.3.1 (22-01-2021)
+- feat: auto camelize key for queries and mutations
+
 ## 0.3 (22-01-2021)
 - feat: add debug mode
     ```GraphqlPreloadQueries::DEBUG = true```
