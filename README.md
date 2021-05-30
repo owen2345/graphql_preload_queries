@@ -1,57 +1,51 @@
 # GraphqlPreloadQueries
-This gem helps you to define all nested preloads to be added when required for graphql data results and avoid the common problem "N+1 Queries". 
+This gem permits your graphql application to define association preloads to improve app performance by removing N+1 query issues. 
 
 ## Usage
   * Object Type
     ```ruby
     class UserType < Types::BaseObject
-      add_preload 'parents|allParents', { preload: :parents, friends: :friends, parents: :parents }
-      add_preload :friends, { parents: { preload: :parents, parents: :parents, friends: :friends } }
-    
       field :id, Int, null: true
       field :name, String, null: true
-      field :friends, [Types::UserType], null: false
-      field :parents, [Types::UserType], null: false
+      field :parents, [Types::UserType], null: false, preload: true
+      field :friends, [Types::UserType], null: false, preload: :user_friends
     end
     ```
-    Examples:
-    * ```add_preload(:friends)```   
-      ```:friends``` association will be preloaded if query includes ```friends```, like: ```user(id: 10) { friends { ... } }```
     
-    * ```add_preload(:allFriends, :friends)```   
-      ```:friends``` association will be preloaded if query includes ```allFriends```, like: ```user(id: 10) { allFriends { ... } }```  
-    
-    * ```add_preload(:allFriends, { preload: :friends, parents: :parents })```   
-      ```:preload``` key can be used to indicate the association name when defining nested preloads, like: ```user(id: 10) { allFriends { id parents { ... } } }```  
-    
-    * ```add_preload(:friends, { allParents: :parents })```    
-      (Nested 1 lvl preloading) ```friends: :parents``` association will be preloaded if query includes ```allParents```, like: ```user(id: 10) { friends { allParents { ... } } }```  
-    
-    * ```add_preload(:friends, { allParents: { preload: :parents, friends: :friends } })```    
-      (Nested 2 levels preloading) ```friends: { parents: :friends }``` association will be preloaded if query includes ```friends``` inside ```parents```, like: ```user(id: 10) { friends { allParents { { friends { ... } } } } }```  
-    
-    * ```add_preload('friends|allFriends', :friends)```    
-      (Multiple gql queries) ```:friends``` association will be preloaded if query includes ```friends``` or ```allFriends```, like: ```user(id: 10) { friends { ... } }``` OR ```user(id: 10) { allFriends { ... } }```   
-      
-    * ```add_preload('ignoredFriends', 'ignored_friends.user')```    
-      (Deep preloading) ```{ ignored_friends: :user }``` association will be preloaded if query includes ```inogredFriends```, like: ```user(id: 10) { ignoredFriends { ... } }```   
+    `preload:` accepts:
+    - `true`: Will use field key as the association name    
+      `field :parents, ..., preload: true` will preload `parents` association
+    - `Symbol`: Custom association name    
+      `field :friends, ..., preload: :user_friends` will preload `user_friends` association
+    - `String`: Tied associations    
+      `field :excluded_friends, ..., preload: 'excluded_friends.user'` will preload `excluded_friends -> user` association
+    - `Hash`: Deep preload definitions   
+      `field :best_friends, ..., preload: { preload: :user_friends, parents: :parents }'`  
+      * Will preload `user_friends` and `user_friends.parents` only if query includes inner definition, like `user(id: 10) { bestFriends { id parents { ... } } }`       
+      * Will not preload `user_friends.parents` if query does not include inner definition, like `user(id: 10) { bestFriends { id } }`
+        
     
   * Preloads in query results
-    ```ruby
-      # queries/users.rb
-      def user(id:)
-        # includes all preloads defined in user type
-        #   Sample: user(id: 10){ friends { id } }
-        #     :friends will be preloaded inside "user" sql query    
-        user = include_gql_preloads(:user, User.where(id: id))
-        
-        # does not include user type preloads (only sub query preloads will be applied)
-        #   Sample: user(id: 10){ friends { id parents { ... } } }
-        #     Only :parents will be preloaded inside "friends" sql query
-        user = User.find(id)
-      end
-    ```
-    - include_gql_preloads: Will preload all preloads configured in UserType based on the gql query.
+    - BEFORE   
+      ```ruby
+        # queries/users.rb
+        def users(ids:)
+          users = User.where(id: ids)
+        end
+      ```
+      Does not apply preloads to the root query.
+    - AFTER
+      ```ruby
+        def users(ids:)
+          user = include_gql_preloads(User.where(id: id))
+        end
+      ```
+      Root query applies all defined preloads
+      
+    - `include_gql_preloads(collection, query_key: nil, type_klass: nil)`: Will include all preloads configured in `type_klass` (UserType) based on the gql query.
+      - `collection` (ActiveRecordCollection) Query results
+      - `query_key` (String | Sym, default: method name) Field result key
+      - `type_klass:` (GQL TypeClass, default: calculates using query_key)
     
   * Preloads in mutation results
     ```ruby
@@ -60,12 +54,14 @@ This gem helps you to define all nested preloads to be added when required for g
       field :users, [Types::UserType], null: true  
       def resolve(ids:)
         affected_users = User.where(id: ids)
-        affected_users = include_gql_preloads(:users, affected_users)
-        puts affected_users.first&.friends # will print preloaded friends data
+        affected_users = include_gql_preloads(affected_users, query_key: :users)
         { users: affected_users }
       end
     ```
-    - include_gql_preloads: Will preload all preloads configured in UserType based on the gql query.
+    - `include_gql_preloads(collection, query_key: , type_klass: nil)`: Will include all preloads configured in `type_klass` (UserType) based on the gql query.
+      - `collection` (ActiveRecordCollection) Query results
+      - `query_key` (String | Sym) Field result key 
+      - `type_klass:` (GQL TypeClass, default: calculates using query_key)
     
 ## Installation
 Add this line to your application's Gemfile:

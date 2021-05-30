@@ -5,7 +5,7 @@ module Types
     field :users, [UserType], null: false
     def users
       data = User.all
-      include_gql_preloads(:users, data) # preloading associations
+      include_gql_preloads(data) # preloading associations
     end
 
     field :user, UserType, null: true do

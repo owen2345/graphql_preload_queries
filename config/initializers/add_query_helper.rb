@@ -3,14 +3,14 @@
 # preload resolver for queries
 Rails.application.config.to_prepare do
   Types::QueryType.class_eval do
-    # TODO: auto recover type_klass using result key
     # Add corresponding preloads to query results
     #   Note: key is automatically calculated based on method name
-    # @param gql_result_key (String | Sym)
     # @param collection (ActiveCollection)
     # @param type_klass (GQL TypeClass, default: calculates using return type)
-    def include_gql_preloads(gql_result_key, collection, type_klass = nil)
-      gql_result_key = GraphQL::Schema::Member::BuildType.camelize(gql_result_key.to_s)
+    # @param query_key (String | Sym) Default method name
+    def include_gql_preloads(collection, query_key: nil, type_klass: nil)
+      query_key ||= caller_locations(1,1)[0].label
+      gql_result_key = GraphQL::Schema::Member::BuildType.camelize(query_key.to_s)
       type_klass ||= preload_type_klass(gql_result_key.to_s)
       klass = GraphqlPreloadQueries::Extensions::Preload
       ast_node = preload_find_node(gql_result_key)
