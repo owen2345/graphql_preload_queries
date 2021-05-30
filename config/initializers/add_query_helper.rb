@@ -9,7 +9,7 @@ Rails.application.config.to_prepare do
     # @param type_klass (GQL TypeClass, default: calculates using return type)
     # @param query_key (String | Sym) Default method name
     def include_gql_preloads(collection, query_key: nil, type_klass: nil)
-      query_key ||= caller_locations(1,1)[0].label
+      query_key ||= caller_locations(1, 1)[0].label
       gql_result_key = GraphQL::Schema::Member::BuildType.camelize(query_key.to_s)
       type_klass ||= preload_type_klass(gql_result_key.to_s)
       klass = GraphqlPreloadQueries::Extensions::Preload

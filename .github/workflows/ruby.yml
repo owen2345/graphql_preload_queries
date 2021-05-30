@@ -46,3 +46,4 @@ jobs:
           bundle exec rspec
       - name: Code style (Rubocop)
         run: bundle exec rubocop
+        if: matrix.ruby == '2.5'
