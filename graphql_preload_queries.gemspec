@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Permit to avoid N+1 queries problem when using graphql queries'
   spec.homepage      = 'https://github.com/owen2345/graphql_preload_queries'
   spec.license       = 'MIT'
-  spec.required_ruby_version = Gem::Requirement.new('>= 2.4.0')
+  spec.required_ruby_version = Gem::Requirement.new('>= 2.0') # rubocop:disable Gemspec/RequiredRubyVersion
 
   # spec.metadata["allowed_push_host"] = ""
 

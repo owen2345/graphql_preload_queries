@@ -31,6 +31,14 @@ Rails.application.config.to_prepare do
         key = GraphQL::Schema::Member::BuildType.camelize(key.to_s)
         preloads[key] = preload
       end
+
+      alias_method :field_old, :field
+      def field(*args, **kwargs, &block)
+        preload = kwargs.delete(:preload)
+        key = args[0]
+        add_preload(key, preload == true ? key : preload) if preload
+        field_old(*args, **kwargs, &block)
+      end
     end
   end
 end
