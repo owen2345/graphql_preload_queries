@@ -1,3 +1,7 @@
+## 0.4.0 (30-05-2021)
+- feat: refactor `include_gql_preloads` to auto calculate `query_key` and make it optional
+- feat: support `:preload` option when defining a field
+
 ## 0.3.1 (22-01-2021)
 - feat: auto camelize key for queries and mutations
 
