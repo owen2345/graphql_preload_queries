@@ -37,7 +37,8 @@ This gem permits your graphql application to define association preloads to impr
     - AFTER
       ```ruby
         def users(ids:)
-          user = include_gql_preloads(User.where(id: id))
+          users = User.where(id: ids)
+          users = include_gql_preloads(users)
         end
       ```
       Root query applies all defined preloads
